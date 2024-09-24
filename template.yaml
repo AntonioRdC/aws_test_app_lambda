@@ -8,11 +8,11 @@ Globals:
     Timeout: 10
 
 Resources:
-  DDBHandlerFunction:
+  GetAllItemsFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: dynamo-handler/
-      Handler: app.handler
+      CodeUri: ./src/
+      Handler: getAllItems.handler
       Runtime: nodejs18.x
       Policies:
         - DynamoDBCrudPolicy:
@@ -23,16 +23,49 @@ Resources:
           Properties:
             Path: /items
             Method: GET
+
+  GetItemFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./src/
+      Handler: getItem.handler
+      Runtime: nodejs18.x
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref ItemsTable
+      Events:
         GetAnItem:
           Type: HttpApi
           Properties:
             Path: /items/{id}
             Method: GET
+
+  DeleteItemFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./src/
+      Handler: deleteItem.handler
+      Runtime: nodejs18.x
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref ItemsTable
+      Events:
         DeleteAnItem:
           Type: HttpApi
           Properties:
             Path: /items/{id}
             Method: DELETE
+
+  PutItemFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./src/
+      Handler: putItem.handler
+      Runtime: nodejs18.x
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref ItemsTable
+      Events:
         CreateOrUpdateItem:
           Type: HttpApi
           Properties:
@@ -51,6 +84,19 @@ Outputs:
   ApiEndpoint:
     Description: "The invoke URL for our HTTP API"
     Value: !Sub "https://${ServerlessHttpApi}.execute-api.${AWS::Region}.amazonaws.com/items"
-  Function:
-    Description: "DynamoDB handler function ARN"
-    Value: !GetAtt DDBHandlerFunction.Arn
+
+  GetAllItemsFunctionArn:
+    Description: "ARN of the GetAllItemsFunction"
+    Value: !GetAtt GetAllItemsFunction.Arn
+
+  GetItemFunctionArn:
+    Description: "ARN of the GetItemFunction"
+    Value: !GetAtt GetItemFunction.Arn
+
+  DeleteItemFunctionArn:
+    Description: "ARN of the DeleteItemFunction"
+    Value: !GetAtt DeleteItemFunction.Arn
+
+  PutItemFunctionArn:
+    Description: "ARN of the PutItemFunction"
+    Value: !GetAtt PutItemFunction.Arn
